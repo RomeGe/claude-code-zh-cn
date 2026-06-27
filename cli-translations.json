@@ -7568,5 +7568,13 @@
   {
     "en": "Add Claude Code GitHub Workflow",
     "zh": "添加 Claude Code GitHub 工作流"
+  },
+  {
+    "en": "Review a GitHub pull request; for your working diff use /code-review",
+    "zh": "审查 GitHub PR；查看工作区差异用 /code-review"
+  },
+  {
+    "en": "Hub for Claude Design",
+    "zh": "Claude Design 中心"
   }
 ]

@@ -5,7 +5,7 @@ Claude Code CLI 中文本地化插件。
 ## 项目结构
 
 - `patch-cli.sh` — CLI 硬编码文字 patch（被 install.sh 和 session-start hook 调用）
-- `cli-translations.json` — 1890 条 UI 翻译对照表（英文→中文），patch-cli.sh 从此文件读取
+- `cli-translations.json` — 1890+ 条 UI 翻译对照表（英文→中文），patch-cli.sh 从此文件读取
 - `install.sh` / `uninstall.sh` — 安装/卸载脚本
 - `compute-patch-revision.sh` — patch 规则指纹计算，供 install.sh 和 session-start hook 共用
 - `settings-overlay.json` — 合并到 settings.json 的中文设置（只含 language、spinnerTipsEnabled 等独有配置，**不含** verbs 和 tips 数据）
@@ -13,6 +13,15 @@ Claude Code CLI 中文本地化插件。
 - `verbs/zh-CN.json` — 187 个 spinner 动词翻译（**唯一数据源**）
 - `tips/zh-CN.json` — 41 条 spinner 提示翻译（**唯一数据源**）
 - `CHANGELOG.md` — 版本变更记录
+
+### ECC 翻译工具
+
+- `ecc-extract-descriptions.js` — 从 ECC 命令/技能/子代理文件提取 description 字段
+- `ecc-translate-descriptions.js` — 批量翻译 ECC 描述为中文（支持 `--resume` 断点续译）
+- `ecc-descriptions-en.json` — ECC 英文描述备份（430 条）
+- `ecc-descriptions-zh.json` — ECC 中文翻译数据（430 条）
+- `patch-ecc-descriptions.sh` — 将中文描述应用到 ECC 文件
+- `ecc-sync-patch.sh` — 增量更新脚本（每次 ecc:sync 后运行）
 
 ## 数据流
 
