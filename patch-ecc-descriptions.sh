@@ -1,12 +1,14 @@
 #!/usr/bin/env bash
 # patch-ecc-descriptions.sh
 # 将中文描述应用到 ECC 的 commands/skills/agents 文件
+# 同时 patch marketplaces 和 cache 两个目录
 # 用法: patch-ecc-descriptions.sh [--dry-run]
 
 set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
-ECC_DIR="${HOME}/.claude/plugins/marketplaces/ecc"
+MARKETPLACE_DIR="${HOME}/.claude/plugins/marketplaces/ecc"
+CACHE_DIR="${HOME}/.claude/plugins/cache/ecc/ecc/2.0.0"
 ZH_FILE="${SCRIPT_DIR}/ecc-descriptions-zh.json"
 DRY_RUN=false
 
@@ -23,11 +25,21 @@ if [[ ! -f "$ZH_FILE" ]]; then
   exit 1
 fi
 
-# 使用 node 解析 JSON 并应用翻译
-export ECC_DIR="$ECC_DIR"
-export ZH_FILE="$ZH_FILE"
-export DRY_RUN="$DRY_RUN"
-node -e "
+# 定义 patch 函数
+patch_directory() {
+  local ECC_DIR="$1"
+  local DIR_NAME="$2"
+
+  if [[ ! -d "$ECC_DIR" ]]; then
+    echo "跳过 $DIR_NAME（目录不存在）"
+    return
+  fi
+
+  echo "--- Patching $DIR_NAME ---"
+  export ECC_DIR="$ECC_DIR"
+  export ZH_FILE="$ZH_FILE"
+  export DRY_RUN="$DRY_RUN"
+  node -e "
 const fs = require('fs');
 const path = require('path');
 
@@ -49,7 +61,6 @@ function patchFile(filePath, zhDesc) {
     const match = content.match(regex);
 
     if (!match) {
-      console.log('  跳过（无 description 字段）: ' + path.relative(ECC_DIR, filePath));
       skipped++;
       return;
     }
@@ -66,7 +77,6 @@ function patchFile(filePath, zhDesc) {
       fs.writeFileSync(filePath, newContent, 'utf-8');
     }
 
-    console.log('  已更新: ' + path.relative(ECC_DIR, filePath));
     patched++;
   } catch (e) {
     console.error('  错误: ' + path.relative(ECC_DIR, filePath) + ' - ' + e.message);
@@ -98,8 +108,15 @@ for (const [key, zhDesc] of Object.entries(zhData.agents || {})) {
   }
 }
 
-console.log('\n=== 完成 ===');
-console.log('已更新: ' + patched + ' 个文件');
-console.log('跳过: ' + skipped + ' 个文件');
-console.log('错误: ' + errors + ' 个文件');
+console.log('  已更新: ' + patched + ' 个文件');
+console.log('  跳过: ' + skipped + ' 个文件');
+console.log('  错误: ' + errors + ' 个文件');
 " ECC_DIR="$ECC_DIR" ZH_FILE="$ZH_FILE" DRY_RUN="$DRY_RUN"
+}
+
+# 同时 patch 两个目录
+patch_directory "$MARKETPLACE_DIR" "marketplaces"
+patch_directory "$CACHE_DIR" "cache"
+
+echo ""
+echo "=== 完成 ==="
